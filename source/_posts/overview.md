@@ -103,37 +103,45 @@ In order to conform to this specification, an ECMAScript implementation must imp
 For the purposes of this document, the following terms and definitions apply.
 就本文档而言，适用以下术语和定义。
 
-## 4.3.1 type
+## 4.3.1 type 类型
 
 set of data values as defined in clause 6 of this specification
+如本规范第6条中定义的一组数据值
 
-## 4.3.2 primitive value
+## 4.3.2 primitive value 原始类型
 
 member of one of the types Undefined, Null, Boolean, Number, Symbol, or String as defined in clause 6
+第6条中定义的未定义、Null、Boolean、Number、Symbol或String类型
 
     NOTE
         A primitive value is a datum that is represented directly at the lowest level of the language implementation.
+        原始值是直接在语言实现的最低级别表示的数据。
 
-## 4.3.3 object
+## 4.3.3 object 对象
 
-member of the type Object
+member of the type Object 对象
 
     NOTE
         An object is a collection of properties and has a single prototype object. The prototype may be the null value.
+        对象是属性的集合，并且只有一个原型对象。原型可以是空值。
 
-## 4.3.4 constructor
+## 4.3.4 constructor 构造函数
 
 function object that creates and initializes objects
+函数对象是用来创建和初始化对象
 
     NOTE
         The value of a constructor's prototype property is a prototype object that is used to implement inheritance and shared properties.
+        构造函数的prototype属性的值是一个prototype对象，用于实现继承和共享属性。
 
 ## 4.3.5 prototype
 
 object that provides shared properties for other objects
+对象是为其他对象提供共享属性
 
     NOTE
         When a constructor creates an object, that object implicitly references the constructor's prototype property for the purpose of resolving property references. The constructor's prototype property can be referenced by the program expression  constructor.prototype, and properties added to an object's prototype are shared, through inheritance, by all objects sharing the prototype. Alternatively, a new object may be created with an explicitly specified prototype by using the  Object.create built-in function.
+        当构造函数创建对象时，该对象隐式引用构造函数的prototype属性，以便解析属性引用。构造函数的prototype属性可以由程序表达式构造函数引用。通过继承，所有共享原型的对象将共享添加到对象原型中的属性。另一种选择是，可以通过使用对象使用显式指定的原型创建新对象。创建内置函数。
 
 ## 4.3.6 ordinary object
 
