@@ -3,12 +3,12 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: ECMAScript® 2019 Language Specification| 中文版
+title: Recoil | Recoil中文 ｜ Recoil中文文档
 subtitle: 
-description: 最新的JavaScript语法标注。
-keywords: JS语法标准 ECMAScript 2019 ES2019 ECMAScript 2019 中文版
+description: Recoil是一个由Facebook最新开发的React开源状态管理库。
+keywords: Recoil Recoil中文 Recoil中文文档
 author: Lee
-language: zh-Hans
+language: zh-CN
 timezone:
 
 # URL
@@ -44,6 +44,9 @@ highlight:
   line_number: true
   auto_detect: true
   tab_replace:
+highlight_theme: night bright
+code_copy:
+  enable: true
   
 # Home page setting
 # path: Root path for your blogs index page. (default = '')
@@ -74,9 +77,10 @@ pagination_dir: page
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: next
+theme: hexo-theme-Annie
+# theme: TKL
 
-# Deployment
+# Deployments
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
   type: git
@@ -87,7 +91,18 @@ deploy:
 #   repository: https://github.com/Leexiaop/Leexiaop.github.io.git
 #   branch: lee
 search:
-  path: search.html
+  # path: search.html
+  # field: post
+  # format: html
+  # limit: 10000
+  path: search.json
+  zipPath: search.zip
+  versionPath: searchVersion.txt
   field: post
-  format: html
-  limit: 10000
+local_search:
+  enable: true
+  # if auto, trigger search by changing input
+  # if manual, trigger search by pressing enter key or search button
+  trigger: auto
+  # show top n results per article, show all results by setting to -1
+  top_n_per_article: 2
