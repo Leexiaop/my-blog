@@ -8,7 +8,7 @@ subtitle:
 description: Recoil是一个由Facebook最新开发的React开源状态管理库。
 keywords: Recoil Recoil中文 Recoil中文文档
 author: Lee
-language: zh-CN
+language: [zh-TW]
 timezone:
 
 # URL
@@ -90,15 +90,15 @@ deploy:
 #   type: git
 #   repository: https://github.com/Leexiaop/Leexiaop.github.io.git
 #   branch: lee
-search:
+# search:
   # path: search.html
   # field: post
   # format: html
   # limit: 10000
-  path: search.json
-  zipPath: search.zip
-  versionPath: searchVersion.txt
-  field: post
+  # path: search.json
+  # zipPath: search.zip
+  # versionPath: searchVersion.txt
+  # field: post
 local_search:
   enable: true
   # if auto, trigger search by changing input
