@@ -5,7 +5,7 @@ categories: recoil
 tags: recoil
 cover: https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1603965430181&di=6ab3a24d8cef6782e6ba68dcb285fb14&imgtype=0&src=http%3A%2F%2Fb.zol-img.com.cn%2Fdesk%2Fbizhi%2Fimage%2F6%2F1920x1080%2F1432000588540.jpg
 ---
-# 概览
+# OverViews 概览
 Recoil lets you create a data-flow graph that flows from atoms (shared state) through selectors (pure functions) and down into your React components. Atoms are units of state that components can subscribe to. Selectors transform this state either synchronously or asynchronously.
 Recoil可以通过Selector(纯函数)和Atoms(共享状态)来创建组件之间共享数据的数据流图。Atoms是组件可以订阅到的状态单元。Selector可以是同步也可以是异步。
 ### Atoms 共享状态
@@ -20,7 +20,7 @@ const fontSizeState = atom({
 Atoms need a unique key, which is used for debugging, persistence, and for certain advanced APIs that let you see a map of all atoms. It is an error for two atoms to have the same key, so make sure they're globally unique. Like React component state, they also have a default value.
 Atoms需要一个唯一的标示key,用于调试、数据持久化、和确保整个Atom整个系统高阶API正常运行。一旦有俩个Atoms有了相同的key就会报错，所以要确保这个标示全局唯一，就像React组件的状态一样，他们也有自己的默认值。
 
-To read and write an atom from a component, we use a hook called useRecoilState. It's just like React's useState, but now the state can be shared between components:
+To read and write an atom from a component, we use a hook called <font color=#D2691E>useRecoilState</font>. It's just like React's <font color=#D2691E>useState</font>, but now the state can be shared between components:
 在组件中开发Atom，会用到useRecoilState这个hooks函数。他就像React中的useState一样，但是运用Atom的hooks函数可以让状态在组件之间共享：
 ```
 function FontButton() {
@@ -59,7 +59,26 @@ const fontSizeLabelState = selector({
     },
 });
 ```
-The <font color=#D2691E>get</font> property is the function that is to be computed. It can access the value of atoms and other selectors using the get argument passed to it. Whenever it accesses another atom or selector, a dependency relationship is created such that updating the other atom or selector will cause this one to be recomputed.
-get属性是一个用于计算的函数。它可以使用入参 get 字段来访问输入的 Atom 和 Selector。当它访问其他 Atom 和 Selector 时，这层依赖关系会保证更新状态的同步。
+The <font color=#D2691E>get</font> property is the function that is to be computed. It can access the value of atoms and other selectors using the <font color=#D2691E>get</font> argument passed to it. Whenever it accesses another atom or selector, a dependency relationship is created such that updating the other atom or selector will cause this one to be recomputed.
+<font color=#D2691E>get</font>属性是一个用于计算的函数。它可以使用入参 <font color=#D2691E>get</font> 字段来访问输入的 Atom 和 Selector。当它访问其他 Atom 和 Selector 时，这层依赖关系会保证更新状态的同步。
 In this fontSizeLabelState example, the selector has one dependency: the fontSizeState atom. Conceptually, the fontSizeLabelState selector behaves like a pure function that takes a fontSizeState as input and returns a formatted font size label as output.
-
+In this <font color=#D2691E>fontSizeLabelState</font> example, the selector has one dependency: the <font color=#D2691E>fontSizeState</font> atom. Conceptually, the <font color=#D2691E>fontSizeLabelState</font> selector behaves like a pure function that takes a <font color=#D2691E>fontSizeLabelState</font> as input and returns a formatted font size label as output.
+参考上述 <font color=#D2691E>fontSizeLabelState</font> 示例，它依赖于 <font color=#D2691E>fontSizeLabelState</font><font color=#D2691E>fontSizeLabelState</font> 使用 <font color=#D2691E>fontSizeLabelState</font> 作为入参，并返回格式化之后的字号文本。
+Selectors can be read using <font color=#D2691E>useRecoilValue()</font>, which takes an atom or selector as an argument and returns the corresponding value. We don't use the <font color=#D2691E>useRecoilState()</font> as the <font color=#D2691E>fontSizeLabelState</font> selector is not writeable see the [selector API reference](https://recoiljs.org/docs/api-reference/core/selector) for more information on writeable selectors):
+我们可以通过在 <font color=#D2691E>useRecoilValue()</font> 方法中输入 Atom 或者 Selector 来获取对应的数据。这里不用 <font color=#D2691E>useRecoilState()</font> 是因为 <font color=#D2691E>fontSizeLabelState</font> 是一个不可写 Selector，更多细节参考 [Selector](https://recoiljs.org/docs/api-reference/core/selector)。
+```
+function FontButton() {
+    const [fontSize, setFontSize] = useRecoilState(fontSizeState);
+    const fontSizeLabel = useRecoilValue(fontSizeLabelState);
+    return (
+        <>
+            <div>Current font size: ${fontSizeLabel}</div>
+            <button onClick={() => setFontSize(fontSize + 1)} style={{fontSize}}>
+                Click to Enlarge
+            </button>
+        </>
+    );
+}
+```
+Clicking on the button now does two things: it increases the font size of the button while also updating the font size label to reflect the current font size.
+点击按钮可以看到按钮和文本的字号同时在更新。
