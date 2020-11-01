@@ -5,7 +5,7 @@ categories: recoil
 tags: recoil
 cover: https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1603965596355&di=4d0f1dda3d6870384b5dff3583bab278&imgtype=0&src=http%3A%2F%2Fpic1.win4000.com%2Fwallpaper%2Fb%2F54f3f3fb543fa.jpg
 ---
-# Motivation 初衷
+### Motivation 初衷
 For reasons of compatibility and simplicity, it's best to use React's built-in state management capabilities rather than external global state. But React has certain limitations:
 秉承简单与兼容性至上的原则，最好的状态管理方式当然是直接使用 React 内置能力而不是外部全部状态。然而 React 确实存在着一些问题：
 
