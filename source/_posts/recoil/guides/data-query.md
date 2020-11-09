@@ -107,8 +107,8 @@ function MyApp() {
 }
 ```
 ### Queries with Parameters 带参请求
-Sometimes you want to be able to query based on parameters that aren't just based on derived state. For example, you may want to query based on the component props. You can do that using the (selectorFamily)[https://recoiljs.org/docs/api-reference/utils/selectorFamily] helper:
-有时候你可能想要发起一个携带参数带请求的不仅仅依赖于派生状态。例如，你的请求是基于组件的props,那么你可以使用(selectorFamily)[https://recoiljs.org/docs/api-reference/utils/selectorFamily]：
+Sometimes you want to be able to query based on parameters that aren't just based on derived state. For example, you may want to query based on the component props. You can do that using the [selectorFamily](https://recoiljs.org/docs/api-reference/utils/selectorFamily) helper:
+有时候你可能想要发起一个携带参数带请求的不仅仅依赖于派生状态。例如，你的请求是基于组件的props,那么你可以使用[selectorFamily](https://recoiljs.org/docs/api-reference/utils/selectorFamily)：
 ```
 const userNameQuery = selectorFamily({
     key: 'UserName',
@@ -206,8 +206,8 @@ function MyApp() {
 }
 ```
 ### Concurrent Requests 当前请求
-If you notice in the above example, the `friendsInfoQuery` uses a query to get the info for each friend. But, by doing this in a loop they are essentially serialized. If the lookup is fast, maybe that's ok. If it's expensive, you can use a concurrency helper such as (waitForAll)[https://recoiljs.org/docs/api-reference/utils/waitForAll] to run them in parallel. This helper accepts both arrays and named objects of dependencies.
-如果你注意到上面到例子。`friendsInfoQuery`发起请求来获取每一个朋友的信息。但是通过这样的循环是为了本质上的有序列化。如果查询速度够快，这没什么，要不然就，可以使用例如(waitForAll)[https://recoiljs.org/docs/api-reference/utils/waitForAll]的并发请求来处理。他既可以接受数组，也可以接受对象作为参数。
+If you notice in the above example, the `friendsInfoQuery` uses a query to get the info for each friend. But, by doing this in a loop they are essentially serialized. If the lookup is fast, maybe that's ok. If it's expensive, you can use a concurrency helper such as [waitForAll](https://recoiljs.org/docs/api-reference/utils/waitForAll) to run them in parallel. This helper accepts both arrays and named objects of dependencies.
+如果你注意到上面到例子。`friendsInfoQuery`发起请求来获取每一个朋友的信息。但是通过这样的循环是为了本质上的有序列化。如果查询速度够快，这没什么，要不然就，可以使用例如[waitForAll](https://recoiljs.org/docs/api-reference/utils/waitForAll)的并发请求来处理。他既可以接受数组，也可以接受对象作为参数。
 ```
 const friendsInfoQuery = selector({
     key: 'FriendsInfoQuery',
@@ -237,7 +237,7 @@ const friendsInfoQuery = selector({
 });
 ```
 ### Pre-Fetching 预请求
-For performance reasons you may wish to kick off fetching before rendering. That way the query can be going while we start rendering. The (React docs)[https://reactjs.org/docs/concurrent-mode-suspense.html#start-fetching-early] give some examples. This pattern works with Recoil as well.
+For performance reasons you may wish to kick off fetching before rendering. That way the query can be going while we start rendering. The [React docs](https://reactjs.org/docs/concurrent-mode-suspense.html#start-fetching-early) give some examples. This pattern works with Recoil as well.
 由于一些其他的原因，你可能希望能在渲染之前开启请求。这当然也是没有问题的。在开始渲染的时候，是可以发起请求的。React文档给了我们例子，这当然也适用于Recoil.
 Let's change the above example to initiate a fetch for the next user info as soon as the user clicks the button to change users:
 我们来修改一下上面的例子，在用户一点击按钮改变用户的时候为下一个用户初始化一个请求。
@@ -266,8 +266,8 @@ function CurrentUserInfo() {
 }
 ```
 ### Async Queries Without React Suspense 没有React Suspense的异步请求
-It is not necessary to use React Suspense for handling pending asynchronous selectors. You can also use the (useRecoilValueLoadable())[https://recoiljs.org/docs/api-reference/core/useRecoilValueLoadable] hook to determine the status during rendering:
-使用React Subspense来处理进行中的异步Selector，并不是必须的。在渲染期间，也可以使用(useRecoilValueLoadable())[https://recoiljs.org/docs/api-reference/core/useRecoilValueLoadable]钩子函数来处理状态。
+It is not necessary to use React Suspense for handling pending asynchronous selectors. You can also use the [useRecoilValueLoadable()](https://recoiljs.org/docs/api-reference/core/useRecoilValueLoadable) hook to determine the status during rendering:
+使用React Subspense来处理进行中的异步Selector，并不是必须的。在渲染期间，也可以使用[useRecoilValueLoadable()](https://recoiljs.org/docs/api-reference/core/useRecoilValueLoadable)钩子函数来处理状态。
 ```
 function UserInfo({userID}) {
     const userNameLoadable = useRecoilValueLoadable(userNameQuery(userID));
@@ -356,5 +356,5 @@ function RefreshUserInfo({userID}) {
 One downside to this approach is that atoms do not currently support accepting a Promise as the new value in order to automatically take advantage of React Suspense while the query refresh is pending, if that is your desired behavior. However, you could store an object which manually encodes the loading status as well as the results if desired.
 这种方法的一个缺点是atoms当前不支持接受Promise作为新值，以便在查询刷新挂起时自动利用React-Suspense（如果这是您想要的行为）。但是，如果需要，您可以存储一个手动编码加载状态和结果的对象。
 
-Also consider (atom effects)[https://recoiljs.org/docs/guides/atom-effects] for query synchronization of atoms.
-同样需求考虑(Atom作用)[https://recoiljs.org/docs/guides/atom-effects]对atom同步请求的影响。
+Also consider [atom effects](https://recoiljs.org/docs/guides/atom-effects) for query synchronization of atoms.
+同样需求考虑[Atom作用](https://recoiljs.org/docs/guides/atom-effects)对atom同步请求的影响。
