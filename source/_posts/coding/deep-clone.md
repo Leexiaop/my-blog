@@ -56,18 +56,21 @@ let deepClone = (item) => {
     if (typeof item !== 'Object' || item === null) {
         return item
     }
-    const map = new Map()
-    if (map.has(item)) {
-        return map.get(item)
-    }
-    let result = Array.isArray(item) ? [] : {}
-    map.set(item, result)
-    for(let key in item) {
-        if (item.hasOwnPropty(key)) {
-            result[key] = deepClone(item[key])
+    const dfs = (obj) => {
+        const map = new Map()
+        if (map.has(obj)) {
+            return map.get(obj)
         }
+        let result = Array.isArray(obj) ? [] : {}
+        map.set(obj, result)
+        for(let key in obj) {
+            if (obj.hasOwnPropty(key)) {
+                result[key] = dfs(obj[key])
+            }
+        }
+        return result
     }
-    return result
+    return dfs(item)
 }
 ```
 
