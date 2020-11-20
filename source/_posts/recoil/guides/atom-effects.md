@@ -33,6 +33,8 @@ type AtomEffect<T> = ({
         | Promise<T | DefaultValue> // Only allowed for initialization at this time
         | ((T | DefaultValue) => T | DefaultValue),
     ) => void,
+
+
     resetSelf: () => void,
 
     // Subscribe to changes in the atom value.
@@ -43,7 +45,8 @@ type AtomEffect<T> = ({
 
 }) => void | () => void; // Optionally return a cleanup handler
 ```
-Atom effects are attached to atoms via the `effects_UNSTABLE` option. Each atom can reference an array of these atom effect functions which are called in priority order when the atom is initialized. Atoms are initialized when they are used for the first time within a `<RecoilRoot>`, but may be re-initialized again if they were unused and cleaned up. The atom effect function may return an optional cleanup handler to manage cleanup side-effects.
+Atom effects are attached to [atoms](https://www.recoiljs.cn/docs/api-reference/core/atom) via the `effects_UNSTABLE` option. Each atom can reference an array of these atom effect functions which are called in priority order when the atom is initialized. Atoms are initialized when they are used for the first time within a `<RecoilRoot>`, but may be re-initialized again if they were unused and cleaned up. The atom effect function may return an optional cleanup handler to manage cleanup side-effects.
+Atom 副作用是通过Atom的`effects_UNSTABLE`来添加的。在Atom初始化的时候。每一个Atom都可以引用一个按照优先级调用的atom副作用函数的数组。当第一次应用于`<RecoilRoot>`时，Atom被初始化。但是也许他们没有被调用或者没有被清除，就会被再次初始化。Atom副作用函数会返回一个可选的处理副作用的函数。
 ```
 const myState = atom({
     key: 'MyKey',
@@ -57,3 +60,20 @@ const myState = atom({
     ],
 });
 ```
+[Atom families](https://www.recoiljs.cn/docs/api-reference/utils/atomFamily) also support parameterized or non-parameterized effects:
+Atom也支持参数化或者无参化：
+```
+const myStateFamily = atomFamily({
+    key: 'MyKey',
+    default: null,
+    effects_UNSTABLE: param => [
+        () => {
+        ...effect 1 using param...
+        return () => ...cleanup effect 1...;
+        },
+        () => { ...effect 2 using param... },
+    ],
+});
+```
+#### Compared to React Effects 与React副作用相比
+Atom effects could mostly be implemented via React `useEffect()`. However, the set of atoms are created outside of a React context, and it can be difficult to manage effects from within React components, particularly for dynamically created atoms. They also cannot be used to initialize the initial atom value or be used with server-side rendering. Using atom effects also co-locates the effects with the atom definitions.
