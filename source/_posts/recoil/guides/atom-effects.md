@@ -77,3 +77,106 @@ const myStateFamily = atomFamily({
 ```
 #### Compared to React Effects 与React副作用相比
 Atom effects could mostly be implemented via React `useEffect()`. However, the set of atoms are created outside of a React context, and it can be difficult to manage effects from within React components, particularly for dynamically created atoms. They also cannot be used to initialize the initial atom value or be used with server-side rendering. Using atom effects also co-locates the effects with the atom definitions.
+Atom副作用主要是通过React的`useEffect`钩子函数来生效。然后atoms是在React上下文之外被创建的。并且在React组建内部管理副作用是非常困难的。特别是动态生成的atoms.这些atoms也常常并不能被用来初始化初始的atom值，或者是用来做服务端渲染。通常atom副作是和定义atom在同一处。
+```
+const myState = atom({key: 'Key', default: null});
+
+function MyStateEffect(): React.Node {
+    const [value, setValue] = useRecoilState(myState);
+    useEffect(() => {
+        // Called when the atom value changes
+        store.set(value);
+        store.onChange(setValue);
+        return () => { store.onChange(null); }; // Cleanup effect
+    }, [value]);
+    return null;
+}
+
+function MyApp(): React.Node {
+    return (
+        <div>
+            <MyStateEffect />
+            ...
+        </div>
+    );
+}
+```
+#### Compared to Snapshots
+The [Snapshot hooks](https://www.recoiljs.cn/docs/api-reference/core/Snapshot#hooks) API can also monitor atom state changes and the initializeState prop in [<RecoilRoot>](https://www.recoiljs.cn/docs/api-reference/core/RecoilRoot) can initialize values for initial render. However, these APIs monitor all state changes and can be awkward to manage dynamic atoms, particularly atom families. With atom effects, the side-effect can be defined per-atom alongside the atom definition and multiple policies can be easily composed.
+Snapshot hooks钩子API可以监听Atom状态的变化并且为初次渲染初始化RecoilRoot组件的初始值。然后，这些API监听所有的状态变化，并且很难管理动态的Atom.尤其是atom系列。有了atom副作用。一些副作用，就可以通过atom提前定义，并且和多种方案组合在一起。
+#### Logging Example
+A simple example of using atom effects are for logging a specific atom's state changes.
+一个简单的使用atom副作用来记录特定atom状态的变化：
+```
+const currentUserIDState = atom({
+    key: 'CurrentUserID',
+    default: null,
+    effects_UNSTABLE: [
+        ({onSet}) => {
+        onSet(newID => {
+            console.debug("Current user ID:", newID);
+        });
+        },
+    ],
+});
+```
+#### History Example
+A more complex example of logging might maintain a history of changes. This example provides an effect which maintains a history queue of state changes with callback handlers that undo that particular change:
+一个更复杂的例子是用来维护变化的历史记录。此示例提供了一个效果，它使用撤消特定更改的回调处理程序维护状态更改的历史队列：
+```
+const history: Array<{
+    label: string,
+    undo: () => void,
+}> = [];
+
+const historyEffect = name => ({setSelf, onSet}) => {
+    onSet((newValue, oldValue) => {
+        history.push({
+            label: `${name}: ${JSON.serialize(oldValue)} -> ${JSON.serialize(newValue)}`,
+            undo: () => {
+                setSelf(oldValue);
+            },
+        });
+    });
+};
+
+const userInfoState = atomFamily({
+    key: 'UserInfo',
+    default: null,
+    effects_UNSTABLE: userID => [
+        historyEffect(`${userID} user info`),
+    ],
+});
+```
+#### State Synchronization Example 状态同步案例
+It can be useful to use atoms as a local cached value of some other state such as a remote database, local storage, &c. You could set the `default` value of an atom using the `default` property with a selector to get the store's value. However, that is only a one-time lookup; if the store's value changes the atom value will not change. With effects, we can subscribe to the store and update the atom's value whenever the store changes. Calling `setSelf()` from the effect will initialize the atom to that value and will be used for the initial render. If the atom is reset, it will revert to the default value, not the initialized value.
+将atom作为诸如，远程数据库，本地存储等的本地缓存状态是非常有用的。可以通过selector设置默认属性给atom设置默认的值来获取存储的值。然后，这只是一次性的。如果存储中的值发生了变化，而atom的值是不会有变化的。通过副作用，无论何时，我们都可以订阅存储中的值，并且更新atom的值。从副作用中调用`setSelf()`函数来初始化atom并且初次渲染。如果atom被重置。他将会再次被设置为默认值，而不是初始值。
+```
+const syncStorageEffect = userID => ({setSelf, trigger}) => {
+    // Initialize atom value to the remote storage state
+    if (trigger === 'get') { // Avoid expensive initialization
+        setSelf(myRemoteStorage.get(userID)); // Call synchronously to initialize
+    }
+
+    // Subscribe to remote storage changes and update the atom value
+    myRemoteStorage.onChange(userID, userInfo => {
+        setSelf(userInfo); // Call asynchronously to change value
+    });
+
+    // Cleanup remote storage subscription
+    return () => {
+        myRemoteStorage.onChange(userID, null);
+    };
+};
+
+const userInfoState = atomFamily({
+    key: 'UserInfo',
+    default: null,
+    effects_UNSTABLE: userID => [
+        historyEffect(`${userID} user info`),
+        syncStorageEffect(userID),
+    ],
+});
+```
+#### Write-Through Cache Example
+We can also bi-directionally sync atom values with remote storage so changes on the server update the atom value and changes in the local atom are written back to the server. The effect will not call the `onSet()` handler when changed via that effect's `setSelf()` to help avoid feedback loops.
