@@ -180,3 +180,146 @@ const userInfoState = atomFamily({
 ```
 #### Write-Through Cache Example
 We can also bi-directionally sync atom values with remote storage so changes on the server update the atom value and changes in the local atom are written back to the server. The effect will not call the `onSet()` handler when changed via that effect's `setSelf()` to help avoid feedback loops.
+我们也可以通过在服务器上的远程存储来更新atom的值也可以重写本地atom的值到服务端的方式来实现双向同步atom的值。当通过副作用的`setSelf()`来循环调用的时候，副作用不会调用`onSet()` 
+```
+const syncStorageEffect = userID => ({setSelf, onSet, trigger}) => {
+    // Initialize atom value to the remote storage state
+    if (trigger === 'get') { // Avoid expensive initialization
+        setSelf(myRemoteStorage.get(userID)); // Call synchronously to initialize
+    }
+
+    // Subscribe to remote storage changes and update the atom value
+    myRemoteStorage.onChange(userID, userInfo => {
+        setSelf(userInfo); // Call asynchronously to change value
+    });
+
+    // Subscribe to local changes and update the server value
+    onSet(userInfo => {
+        myRemoteStorage.set(userID, userInfo);
+    });
+
+    // Cleanup remote storage subscription
+    return () => {
+        myRemoteStorage.onChange(userID, null);
+    };
+};
+```
+#### Local Storage Persistence 本地存储持久化
+Atom effects can be used to persist atom state with [browser local storage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage). Note that the following examples are simplified for illustrative purposes and do not cover all cases.
+Atom副作用可以通过浏览器本地存储做atom状态的持久化。注意下面的例子，非常简明的说明了这点，但并不能涵盖所有。
+```
+const localStorageEffect = key => ({setSelf, onSet}) => {
+    const savedValue = localStorage.getItem(key)
+    if (savedValue != null) {
+        setSelf(JSON.parse(savedValue));
+    }
+
+    onSet(newValue => {
+        if (newValue instanceof DefaultValue) {
+            localStorage.removeItem(key);
+        } else {
+            localStorage.setItem(key, JSON.stringify(newValue));
+        }
+    });
+};
+
+const currentUserIDState = atom({
+    key: 'CurrentUserID',
+    default: 1,
+    effects_UNSTABLE: [
+        localStorageEffect('current_user'),
+    ]
+});
+```
+#### Backward Compatibility
+What if you change the format for an atom? Loading a page with the new format with a localStorage based on the old format could case a problem. You could build effects to handle restoring and validating the value in a type safe way:
+要是你改变了atom的格式怎么办？用新的格式加在基于旧的格式的页面将会有问题。你可以创建新的副作用来重新存储并且验证值是安全的：
+```
+type PersistenceOptions<T>: {
+    key: string,
+    restorer: (mixed, DefaultValue) => T | DefaultValue,
+};
+
+const localStorageEffect = <T>(options: PersistenceOptions<T>) => ({setSelf, onSet}) => {
+    const savedValue = localStorage.getItem(options.key)
+    if (savedValue != null) {
+        setSelf(options.restorer(JSON.parse(savedValue), new DefaultValue()));
+    }
+
+    onSet(newValue => {
+        if (newValue instanceof DefaultValue) {
+            localStorage.removeItem(options.key);
+        } else {
+            localStorage.setItem(options.key, JSON.stringify(newValue));
+        }
+    });
+};
+
+const currentUserIDState = atom<number>({
+    key: 'CurrentUserID',
+    default: 1,
+    effects_UNSTABLE: [
+        localStorageEffect({
+        key: 'current_user',
+        restorer: (value, defaultValue) =>
+            // values are currently persisted as numbers
+            typeof value === 'number'
+            ? value
+            // if value was previously persisted as a string, parse it to a number
+            : typeof value === 'string'
+            ? parseInt(value, 10)
+            // if type of value is not recognized, then use the atom's default value.
+            : defaultValue
+        }),
+    ],
+});
+```
+What if the key used to persist the value changes? Or what used to be persisted using one key now uses several? Or vice versa? That can also be handled in a type-safe way:
+要是持久化数据的key变化了怎么办？或者是之前用一个，现在用了多个key怎么办？反之亦然。这也依然可以通过安全的方式来处理：
+```
+type PersistenceOptions<T>: {
+    key: string,
+    restorer: (mixed, DefaultValue, Map<string, mixed>) => T | DefaultValue,
+};
+
+const localStorageEffect = <T>(options: PersistenceOptions<T>) => ({setSelf, onSet}) => {
+    const savedValues = parseValuesFromStorage(localStorage);
+    const savedValue = savedValues.get(options.key);
+    setSelf(
+        options.restorer(savedValue ?? new DefaultValue(), new DefaultValue(), savedValues),
+    );
+
+    onSet(newValue => {
+        if (newValue instanceof DefaultValue) {
+            localStorage.removeItem(options.key);
+        } else {
+            localStorage.setItem(options.key, JSON.stringify(newValue));
+        }
+    });
+};
+
+const currentUserIDState = atom<number>({
+    key: 'CurrentUserID',
+    default: 1,
+    effects_UNSTABLE: [
+        localStorageEffect({
+        key: 'current_user',
+        restorer: (value, defaultValue, values) => {
+            if (typeof value === 'number') {
+                return value;
+            }
+
+            const oldValue = values.get('old_key');
+            if (typeof oldValue === 'number') {
+                return oldValue;
+            }
+
+            return defaultValue;
+        },
+        }),
+    ],
+});
+```
+#### Browser URL History Persistence 浏览器URL历史数据持久化
+Atom state can also be persisted and synced with the browser URL history. This can be useful to have state changes update the current URL so it can be saved or shared with others to restore that state. It can also be integrated with the browser history to leverage the browser forward/back buttons. Examples or a library to provide this type of persistence are coming soon...
+浏览器同样可以用来做浏览器URL历史的数据持久化和数据的同步。这在处理更新当前URL状态是非常有用的，这对于保存或者和与别的Atom共享重新存储状态是非常有用的。它还可以与浏览器历史记录集成，以利用浏览器前进/后退按钮。提供这个功能的案例或者是库正在开发中...
