@@ -41,6 +41,9 @@ external_link:
 filename_case: 0
 render_drafts: false
 post_asset_folder: true
+marked:
+  prependRoot: true
+  postAsset: true
 relative_link: false
 future: true
 highlight:
@@ -96,11 +99,26 @@ deploy:
 #   type: git
 #   repository: https://github.com/Leexiaop/Leexiaop.github.io.git
 #   branch: lee
+# search:
+#     path: search.json
+#     zipPath: search.zip
+#     versionPath: searchVersion.txt
+#     field: post
+  # hexo-generator-searchdb
 search:
-    path: search.json
-    zipPath: search.zip
-    versionPath: searchVersion.txt
-    field: post
+  path: search.xml
+  field: post
+  format: html
+
+feed:
+  type: atom
+  path: atom.xml
+  limit: 20
+  hub:
+  content:
+  content_limit: 140
+  content_limit_delim: " "
+  order_by: -date
 # local_search:
 #   enable: true
 #   # if auto, trigger search by changing input
