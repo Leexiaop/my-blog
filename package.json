@@ -6,6 +6,8 @@
     "version": "5.4.0"
   },
   "dependencies": {
+    "acorn": "^8.5.0",
+    "eslint": "^7.32.0",
     "hexo": "^5.4.0",
     "hexo-asset-image": "github:CodeFalling/hexo-asset-image",
     "hexo-deployer-git": "^3.0.0",
